@@ -1,0 +1,23 @@
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Artefatos gerados pelo pipeline
+outputs/
+models/
+*.pkl
+
+# Cache de dados (kagglehub baixa fora do repo, mas por garantia)
+*.csv.zip
+
+# Sistema / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp

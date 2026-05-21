@@ -9,6 +9,8 @@ Uso:
 import argparse
 from pathlib import Path
 
+from fastai.learner import load_learner
+
 from data import build_dataloaders, download_dataset, get_test_files
 from evaluate import evaluate_on_test, plot_training_curves
 from model import build_learner
@@ -41,21 +43,26 @@ def main():
     print("\n[1/5] Baixando dataset...")
     root = download_dataset()
 
-    print("\n[2/5] Preparando DataLoaders...")
-    dls = build_dataloaders(root, batch_size=args.batch_size, seed=args.seed)
+    pkl_path = args.output_dir / "pneumonia_resnet50.pkl"
+    if pkl_path.exists():
+        print(f"\n[2-4/5] Modelo já treinado encontrado em {pkl_path}; pulando treino.")
+        learner = load_learner(pkl_path)
+    else:
+        print("\n[2/5] Preparando DataLoaders...")
+        dls = build_dataloaders(root, batch_size=args.batch_size, seed=args.seed)
 
-    print("\n[3/5] Construindo modelo ResNet50 (transfer learning)...")
-    learner = build_learner(dls)
+        print("\n[3/5] Construindo modelo ResNet50 (transfer learning)...")
+        learner = build_learner(dls)
 
-    print("\n[4/5] Treinando o modelo...")
-    history = train_model(
-        learner,
-        frozen_epochs=args.frozen_epochs,
-        unfrozen_epochs=args.epochs,
-        base_lr=args.lr,
-        output_dir=args.output_dir,
-    )
-    plot_training_curves(history, args.output_dir)
+        print("\n[4/5] Treinando o modelo...")
+        history = train_model(
+            learner,
+            frozen_epochs=args.frozen_epochs,
+            unfrozen_epochs=args.epochs,
+            base_lr=args.lr,
+            output_dir=args.output_dir,
+        )
+        plot_training_curves(history, args.output_dir)
 
     print("\n[5/5] Avaliando no conjunto de teste oficial...")
     test_files = get_test_files(root)
