@@ -1,0 +1,13 @@
+{
+  "accuracy": 0.8493589743589743,
+  "precision": 0.8083333333333333,
+  "recall": 0.9948717948717949,
+  "f1_score": 0.8919540229885058,
+  "roc_auc": 0.9600482138943678,
+  "classes": [
+    "NORMAL",
+    "PNEUMONIA"
+  ],
+  "positive_class": "PNEUMONIA",
+  "n_test_samples": 624
+}
