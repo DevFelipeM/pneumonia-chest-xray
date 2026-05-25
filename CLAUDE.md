@@ -39,4 +39,4 @@ The positive-class-by-name logic is duplicated as `_pos_label_index` (model.py) 
 
 ## Outputs
 
-All artifacts go to `outputs/` (configurable via `--output-dir`): `training_history.csv`, `training_curves.png`, `metrics.json`, `confusion_matrix.png`, `classification_report.txt`, and the exported model `pneumonia_resnet50.pkl`. Intermediate best-model checkpoints are saved by FastAI under a `models/` dir relative to the data path.
+All artifacts go to `outputs/` (configurable via `--output-dir`): `training_history.csv`, `training_curves.png`, `metrics.json`, `confusion_matrix.png`, `roc_curve.png`, `classification_report.txt`, and the exported model `pneumonia_resnet50.pkl`. Intermediate best-model checkpoints are saved by FastAI under a `models/` dir relative to the data path.

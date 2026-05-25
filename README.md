@@ -24,6 +24,34 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Autenticacao no Kaggle
+
+O download do dataset (em `data.py`, via `kagglehub.dataset_download`) exige uma chave de API do Kaggle. Sem ela, a primeira execucao falha ao tentar baixar o dataset.
+
+Como gerar e configurar:
+
+1. Faca login em https://www.kaggle.com e va em **Settings -> API -> Create New Token**. Sera baixado um arquivo `kaggle.json` contendo seu usuario e chave.
+2. Coloque o arquivo em `~/.kaggle/kaggle.json` e restrinja as permissoes:
+
+   ```bash
+   mkdir -p ~/.kaggle
+   mv ~/Downloads/kaggle.json ~/.kaggle/kaggle.json
+   chmod 600 ~/.kaggle/kaggle.json
+   ```
+
+   Alternativamente, exporte como variaveis de ambiente:
+
+   ```bash
+   export KAGGLE_USERNAME=seu_usuario
+   export KAGGLE_KEY=sua_chave
+   ```
+
+3. Aceite os termos do dataset acessando https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia uma vez no navegador (necessario na primeira vez por conta).
+
+Depois do primeiro download o dataset fica em cache local (`~/.cache/kagglehub/`), entao execucoes seguintes nao baixam de novo.
+
+> Nunca commite o `kaggle.json` no repositorio. Se vazar a chave, gere uma nova em **Settings -> API -> Expire Token**.
+
 ## Como executar
 
 ```bash
