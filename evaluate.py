@@ -20,6 +20,7 @@ from sklearn.metrics import (
 
 
 MAIN_THRESHOLD = "youden"
+USE_TTA = True  # Test-Time Augmentation: agrega predições sobre versões aumentadas da mesma imagem
 
 
 def evaluate_on_test(learner, test_files, output_dir: Path = Path("outputs")):
@@ -40,8 +41,9 @@ def evaluate_on_test(learner, test_files, output_dir: Path = Path("outputs")):
     pos = _pos_index(vocab)
     pos_class = str(vocab[pos])
 
-    print("\nGerando predições no conjunto de validação para calibrar thresholds...")
-    val_preds, val_targets = learner.get_preds()  # default: dls.valid
+    infer = "TTA" if USE_TTA else "passagem única"
+    print(f"\nGerando predições no conjunto de validação ({infer}) para calibrar thresholds...")
+    val_preds, val_targets = _infer(learner)  # default: dls.valid
     if len(val_targets) == 0:
         raise RuntimeError(
             "dls.valid está vazio. Se o learner foi carregado de .pkl, "
@@ -56,9 +58,9 @@ def evaluate_on_test(learner, test_files, output_dir: Path = Path("outputs")):
     for name, t in thresholds.items():
         print(f"  {name:<10s}: {t:.4f}")
 
-    print(f"\nAvaliando {len(test_files)} imagens do conjunto de teste...")
+    print(f"\nAvaliando {len(test_files)} imagens do conjunto de teste ({infer})...")
     test_dl = learner.dls.test_dl(test_files, with_labels=True)
-    preds, targets = learner.get_preds(dl=test_dl)
+    preds, targets = _infer(learner, dl=test_dl)
     y_true = targets.numpy()
     y_score = preds[:, pos].numpy()
 
@@ -87,6 +89,17 @@ def _pos_index(vocab) -> int:
         if str(label).lower().startswith("pneumonia"):
             return i
     return len(vocab) - 1
+
+
+def _infer(learner, dl=None):
+    """Roda inferência respeitando a flag global USE_TTA.
+
+    `learner.tta` faz n passagens com augmentações + 1 sem augmentação e
+    combina as predições (FastAI default: beta=0.25 -> 0.25*original + 0.75*mean_aug).
+    """
+    if USE_TTA:
+        return learner.tta() if dl is None else learner.tta(dl=dl)
+    return learner.get_preds() if dl is None else learner.get_preds(dl=dl)
 
 
 def _find_thresholds(y_true, y_score, pos) -> dict:
@@ -153,6 +166,7 @@ def _compute_all_metrics(y_true, y_score, thresholds, pos, vocab, n_validation: 
         "n_test_samples": int(len(y_true)),
         "n_validation_samples": int(n_validation),
         "main_threshold": MAIN_THRESHOLD,
+        "inference": {"tta": bool(USE_TTA)},
         "test_metrics_by_threshold": by_thr,
     }
 
