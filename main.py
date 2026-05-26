@@ -47,6 +47,11 @@ def main():
     if pkl_path.exists():
         print(f"\n[2-4/5] Modelo já treinado encontrado em {pkl_path}; pulando treino.")
         learner = load_learner(pkl_path)
+        # load_learner descarta os items dos DataLoaders; reata para que
+        # evaluate_on_test consiga rodar predições no dls.valid (calibração de threshold).
+        # RandomSplitter com seed fixa garante a mesma divisão treino/val.
+        print("Reanexando DataLoaders (necessário para calibração de threshold)...")
+        learner.dls = build_dataloaders(root, batch_size=args.batch_size, seed=args.seed)
     else:
         print("\n[2/5] Preparando DataLoaders...")
         dls = build_dataloaders(root, batch_size=args.batch_size, seed=args.seed)
